@@ -1,0 +1,6 @@
+# python env
+.idea/
+__pycache__
+
+# demo file
+demo*
