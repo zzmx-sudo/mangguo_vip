@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>芒果-登陆</title>
+</head>
+<body>
+    <div class="container">
+        <form class="form-register">
+            <div class="form-group form-group-lg">
+                <div class="input-group">
+                    <input type="number" class="form-control" name="mobile" id="mobile" placeholder="手机号" required>
+                </div>
+            </div>
+            <div class="form-group form-group-lg">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="phone_code" id="phone_code" placeholder="短信验证码" required>
+                    <div class="phone_code input-group-addon">
+                        <a class="phone_code-a" href="javascript:;" onclick="sendSMSCode();">获取验证码</a>
+                    </div>
+                    <div class="input-group">
+                    <input type="text" class="form-control" name="redeem_code" id="redeem_code" placeholder="请输入VIP兑换码"
+                    required>
+                    </div>
+                    <button type="submit" class="btn btn-lg btn-theme btn-block">立即兑换</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
