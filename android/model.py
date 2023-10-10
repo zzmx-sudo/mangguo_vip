@@ -1,6 +1,10 @@
+import os
+import time
+from typing import Union
 import socket
 from appium import webdriver
 from appium.webdriver.extensions.android.nativekey import AndroidKey
+from selenium.common import exceptions as s_exceptions
 
 class MangoTVModel:
 
@@ -11,7 +15,7 @@ class MangoTVModel:
         if err_init_msg:
             raise SystemError(f"环境校验不通过, 初始化模块失败, 环境校验信息: {err_init_msg}")
 
-        self._driver = None
+        self._driver: Union[webdriver.Remote, None] = None
         self._window_width = 0
         self._window_height = 0
         self._setup()
@@ -20,6 +24,7 @@ class MangoTVModel:
         """
         填入手机号并点击获取验证码
         """
+        self._check_back_profile()
         self._driver.find_element_by_id("tvNickname").click()
         elements = self._driver.find_elements_by_id("tvText")
         if elements:
@@ -42,10 +47,50 @@ class MangoTVModel:
         self._driver.find_element_by_id("tvCheck").click()
         self._driver.find_element_by_id("ivRight").click()
 
+        return ""
+
     def login_and_fillIn_redeemCode(self, phone_number, smsCode, redeemCode):
         """
         登录并填入兑换码兑换
         """
+        self._check_back_profile()
+        self._driver.find_element_by_id("tvNickname").click()
+        elements = self._driver.find_elements_by_id("tvText")
+        if elements:
+            for element in elements:
+                if element.text == "切换账号":
+                    element.click()
+                    break
+
+        phone_clear = self._driver.find_element_by_id("ivClear")
+        if phone_clear: phone_clear.click()
+
+        elements = self._driver.find_elements_by_id("etContent")
+        input_phone, input_sms = False, False
+        if elements:
+            for element in elements:
+                if element.text == "请输入手机号":
+                    element.click()
+                    element.send_keys(phone_number)
+                    input_phone = True
+                    if input_sms: break
+                elif element.text == "请输入校验码":
+                    element.click()
+                    element.send_keys(smsCode)
+                    input_sms = True
+                    if input_phone: break
+        if not input_phone or not input_sms:
+            return "登录失败, 未能正确输入手机号和验证码"
+        self._driver.find_element_by_id("checkBox").click()
+        self._driver.find_element_by_id("tvText").click()
+        try:
+            close_button = self._driver.find_element_by_id("ivRight")
+        except s_exceptions.NoSuchElementException:
+            pass
+        else:
+            close_button.click()
+            return "登录失败, 验证码不正确或失效"
+        # TODO: 兑换操作
 
     def quit(self):
         """
@@ -71,6 +116,10 @@ class MangoTVModel:
             return "未检测到开启的AppIum, 请以4723端口开启AppIum后再运行程序"
         finally:
             sock.close()
+
+        devices = os.popen("adb devices").read().replace("List of devices attached", "").strip()
+        if not devices:
+            return "未检测到USB调试设备, 请手机打开USB调试后连接电脑在运行程序"
 
         return ""
 
@@ -107,8 +156,9 @@ class MangoTVModel:
         """
         校验APP已经退出账号并在我的页面, 若不是进入该状态
         """
-        bottom_menus = self._driver.find_elements_by_id("viewTabPlaceholder")
-        if not bottom_menus:
+        try:
+            bottom_menus = self._driver.find_elements_by_id("viewTabPlaceholder")
+        except s_exceptions.NoSuchElementException:
             return False
 
         # 进入我的页面
@@ -131,8 +181,8 @@ class MangoTVModel:
 
         while True:
             self._driver.swipe(
-                self._window_width*0.5, self._window_height*0.9,
-                self._window_width*0.5, self._window_height*0.1,
+                int(self._window_width*0.5), int(self._window_height*0.9),
+                int(self._window_width*0.5), int(self._window_height*0.1),
                 1000
             )
             elements = self._driver.find_elements_by_id("tvTitle")
@@ -141,3 +191,11 @@ class MangoTVModel:
 
         self._driver.find_elements_by_id("tvTitle")[-1].click()
         return True
+
+
+if __name__ == '__main__':
+    obj = MangoTVModel("12")
+    # obj.generate_sms_code("18268076418")
+    result = obj.login_and_fillIn_redeemCode("15779490124", "370048", "Xad")
+    print(result)
+    obj.quit()
