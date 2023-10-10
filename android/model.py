@@ -195,7 +195,7 @@ class MangoTVModel:
 
 if __name__ == '__main__':
     obj = MangoTVModel("12")
-    # obj.generate_sms_code("18268076418")
-    result = obj.login_and_fillIn_redeemCode("15779490124", "370048", "Xad")
+    # obj.generate_sms_code("123456")
+    result = obj.login_and_fillIn_redeemCode("123456", "370048", "Xad")
     print(result)
     obj.quit()
