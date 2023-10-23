@@ -2,5 +2,14 @@
 .idea/
 __pycache__
 
+# IDE env
+.vscode
+
+# frontend
+node_modules/
+
+# mac env
+.DS_Store
+
 # demo file
 demo*
