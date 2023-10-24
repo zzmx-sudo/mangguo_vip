@@ -13,8 +13,8 @@
           <div class="codeBox">
             <span class="codeText">验证码:</span>
             <div class="codeEdit">
-              <input v-model="$v.user.code.$model" type="text" placeholder="请输入验证码">
-              <div class="get-code">获取验证码</div>
+              <input v-model="$v.user.code.$model" type="number" placeholder="请输入验证码">
+              <div class="get-code" :style="codeButton.style" @click="codeButtonClick">{{ codeButton.text }}</div>
             </div>
             <div class="error" v-show="validateState('code')">验证码为6位数字</div>
           </div>
@@ -42,7 +42,16 @@ export default {
       user: {
         telephone: "",
         code: ""
-      }
+      },
+      codeButton: {
+        text: "获取验证码",
+        style: {
+          color: "black",
+          backgroundColor: "#fff",
+          fontSize: "15px"
+        }
+      },
+      codeIsClick: false
     }
   },
   validations: {
@@ -54,8 +63,18 @@ export default {
   methods: {
     loginClick() {
       if (!this.phone || !this.code) {
-        console.log("请输入完整手机号和验证码后再登陆");
+        console.log("请输入正确的手机号和验证码后再登录");
       }
+    },
+    codeButtonClick() {
+      if (this.codeIsClick) {
+        return
+      }
+      if (!this.validateState("telephone")) {
+        console.log("请输入正确的手机号后再获取验证码");
+      }
+      // 调用api获取手机验证码
+      
     },
     validateState(name) {
       const { $dirty, $error } = this.$v.user[name];
@@ -73,6 +92,7 @@ export default {
 }
 
 .container>div {
+  margin-top: 20px;
   margin-bottom: 20px;
   font-size: 18px;
 }
@@ -91,26 +111,37 @@ export default {
   height: 40px;
   line-height: 40px;
   font-size: 16px;
-  margin-top: 10px;
   padding-left: 15px;
   border: 1px solid #fff;
   background-color: #c0bebd76;
   border-radius: 8px;
 }
 
+.phoneBox .phoneEdit, .codeBox .codeEdit {
+  margin-top: 10px;
+}
+
 .codeBox span {
   display: block;
 }
 
-.codeBox input {
-  width: auto;
-  display: inline;
+.codeBox .codeEdit {
+  height: 40px;
+  line-height: 40px;
+}
+
+.codeEdit input {
+  width: 60%;
   float: left;
 }
 
-.codeBox .get-code {
+.codeEdit .get-code {
+  width: 35%;
+  float: right;
   height: 40px;
-  line-height: 40px;
+  text-align: center;
+  border: 1px solid #fb5c12c6;
+  border-radius: 5px;
 }
 
 .loginButton {
