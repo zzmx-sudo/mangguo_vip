@@ -18,8 +18,17 @@
             </div>
             <div class="error" v-show="validateState('code')">验证码为6位数字</div>
           </div>
-          <div class="loginButton" @click="loginClick">
-            点击登录
+          <div class="bottomContainer"  v-if="isGetCode">
+            <div class="exchangeCodebox">
+              <span class="exchangeCodeText">兑换码:</span>
+              <div class="exchangeCodeEdit">
+                <input v-model="$v.user.exchangeCode.$model" type="text" placeholder="请输入兑换码">
+              </div>
+              <div class="error" v-show="validateState('exchangeCode')">请输入正确的兑换码</div>
+            </div>
+            <div class="exchangeButton" @click="exchangeClick" :style="exchangeButton.style">
+              {{ exchangeButton.text }}
+            </div>
           </div>
         </div>
       </div>
@@ -30,7 +39,7 @@
 <script>
 import TabBar from "@/components/TabBar.vue"
 
-import { telephone, code } from "@/vuelidate/vuelidate"
+import { telephone, code, exchangeCode } from "@/vuelidate/vuelidate"
 
 export default {
   name: "Login",
@@ -41,7 +50,8 @@ export default {
     return {
       user: {
         telephone: "",
-        code: ""
+        code: "",
+        exchangeCode: ""
       },
       codeButton: {
         text: "获取验证码",
@@ -51,30 +61,57 @@ export default {
           fontSize: "15px"
         }
       },
-      codeIsClick: false
+      exchangeButton: {
+        text: "点击兑换",
+        style: {
+          color: "#fff",
+          backgroundColor: "#fb5c12c6",
+          foneSize: "18px"
+        }
+      },
+      isGetCode: false
     }
   },
   validations: {
     user: {
       telephone: telephone,
-      code: code
+      code: code,
+      exchangeCode: exchangeCode
     },
   },
   methods: {
-    loginClick() {
-      if (!this.phone || !this.code) {
-        console.log("请输入正确的手机号和验证码后再登录");
-      }
-    },
-    codeButtonClick() {
-      if (this.codeIsClick) {
+    exchangeClick() {
+      if (!this.user.telephone || !this.user.code || ! this.user.exchangeCode) {
+        console.log("请输入正确的手机号、验证码和兑换码后再点击兑换");
         return
       }
-      if (!this.validateState("telephone")) {
+      if (
+        this.validateState("telephone") || 
+        this.validateState("code") || 
+        this.validateState("exchangeCode")
+      ) {
+        console.log("请输入正确的手机号、验证码和兑换码后再点击兑换");
+        return
+      }
+      // 调用api获取手机验证码
+
+      this.exchangeButton.style = {
+        color: "black",
+        backgroundColor: "rgb(200, 200, 200)"
+      }
+      this.exchangeButton.text = "兑换中。。。"
+    },
+    codeButtonClick() {
+      if (this.codeButton.text !== "获取验证码") {
+        return
+      }
+      if (!this.user.telephone || this.validateState("telephone")) {
         console.log("请输入正确的手机号后再获取验证码");
+        return
       }
       // 调用api获取手机验证码
       
+      this.isGetCode = true
     },
     validateState(name) {
       const { $dirty, $error } = this.$v.user[name];
@@ -104,10 +141,10 @@ export default {
   padding-left: 10px;
 }
 
-.phoneBox input {
+.phoneBox input, .exchangeCodebox input {
   width: 100%;
 }
-.phoneBox input, .codeBox input {
+.phoneBox input, .codeBox input, .exchangeCodebox input {
   height: 40px;
   line-height: 40px;
   font-size: 16px;
@@ -117,7 +154,7 @@ export default {
   border-radius: 8px;
 }
 
-.phoneBox .phoneEdit, .codeBox .codeEdit {
+.phoneBox .phoneEdit, .codeBox .codeEdit, .exchangeCodeBox .exchangeCodeEdit {
   margin-top: 10px;
 }
 
@@ -144,13 +181,15 @@ export default {
   border-radius: 5px;
 }
 
-.loginButton {
+.exchangeCodeEdit {
+  margin-top: 10px;
+}
+
+.exchangeButton {
   margin-top: 40px;
   height: 40px;
   line-height: 40px;
   text-align: center;
   border-radius: 10px;
-  color: #fff;
-  background-color: #fb5c12c6;
 }
 </style>
