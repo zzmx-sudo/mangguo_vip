@@ -33,18 +33,23 @@
         </div>
       </div>
     </tab-bar>
+    <message-box ref="messageBox" :title="messageTitle" :message="messageContent" :color="messageColor">
+    </message-box>
   </div>
 </template>
 
 <script>
 import TabBar from "@/components/TabBar.vue"
+import MessageBox from "@/components/MessageBox.vue"
 
 import { telephone, code, exchangeCode } from "@/vuelidate/vuelidate"
+import { getCode, exchange } from "@/network/home"
 
 export default {
   name: "Login",
   components: {
-    TabBar
+    TabBar,
+    MessageBox
   },
   data() {
     return {
@@ -55,6 +60,7 @@ export default {
       },
       codeButton: {
         text: "获取验证码",
+        clicking: false,
         style: {
           color: "black",
           backgroundColor: "#fff",
@@ -63,13 +69,17 @@ export default {
       },
       exchangeButton: {
         text: "点击兑换",
+        clicking: false,
         style: {
           color: "#fff",
           backgroundColor: "#fb5c12c6",
           foneSize: "18px"
         }
       },
-      isGetCode: false
+      isGetCode: false,
+      messageTitle: "",
+      messageContent: "",
+      messageColor: ""
     }
   },
   validations: {
@@ -81,8 +91,16 @@ export default {
   },
   methods: {
     exchangeClick() {
+      if (this.exchangeButton.text !== "点击兑换" || this.exchangeButton.clicking) {
+        return
+      }
+      console.log("exchangeClick...");
       if (!this.user.telephone || !this.user.code || ! this.user.exchangeCode) {
-        console.log("请输入正确的手机号、验证码和兑换码后再点击兑换");
+        this.showMessage(
+          "参数不完整",
+          "请输入正确的手机号、验证码和兑换码后再点击兑换",
+          "red"
+        )
         return
       }
       if (
@@ -90,32 +108,113 @@ export default {
         this.validateState("code") || 
         this.validateState("exchangeCode")
       ) {
-        console.log("请输入正确的手机号、验证码和兑换码后再点击兑换");
+        this.showMessage(
+          "参数不完整",
+          "请输入正确的手机号、验证码和兑换码后再点击兑换",
+          "red"
+        )
         return
       }
-      // 调用api获取手机验证码
-
-      this.exchangeButton.style = {
-        color: "black",
-        backgroundColor: "rgb(200, 200, 200)"
-      }
+      this.exchangeButton.clicking = true;
       this.exchangeButton.text = "兑换中。。。"
+      // 调用api实现兑换
+      exchange(this.user).then(res => {
+        if (res.errno !== "200") {
+          this.showMessage(
+            "兑换失败",
+            res.errmsg,
+            "red"
+          )
+          this.exchangeButton.clicking = false;
+          this.exchangeButton.text = "点击兑换"
+        } else {
+          this.showMessage(
+            "兑换成功",
+            "发起兑换成功, 预计10分钟之内可兑换完成, 您可在芒果TV中查看结果",
+            "green"
+          )
+          this.exchangeButton.text = "兑换成功";
+          this.exchangeButton.style = {
+            color: "black",
+            backgroundColor: "rgb(200, 200, 200)"
+          }
+        }
+      }).catch(error => {
+        this.showMessage(
+          "兑换失败",
+          "兑换发生网络错误",
+          "red"
+        )
+        this.exchangeButton.clicking = false;
+        this.exchangeButton.text = "点击兑换"
+      })
     },
     codeButtonClick() {
-      if (this.codeButton.text !== "获取验证码") {
+      if (this.codeButton.text !== "获取验证码" || this.codeButton.clicking) {
         return
       }
       if (!this.user.telephone || this.validateState("telephone")) {
-        console.log("请输入正确的手机号后再获取验证码");
+        this.showMessage(
+          "非法手机号",
+          "手机号格式不正确, 请输入正确手机号后再获取验证码！",
+          "red"
+        )
         return
       }
-      // 调用api获取手机验证码
-      
-      this.isGetCode = true
+      // 调用api获取验证码
+      getCode(this.user.telephone).then(res => {
+        if (res.errno !== "200") {
+          this.showMessage(
+            "获取验证码失败",
+            res.errmsg,
+            "red"
+          )
+        } else {
+          this.isGetCode = true;
+          this.codeButton.clicking = true;
+          this.codeButton.style = {
+            color: "black",
+            backgroundColor: "rgb(200, 200, 200)",
+            fontSize: "15px",
+            border: "none"
+          };
+          let second = 60;
+          this.codeButton.text = String(second) + " 秒"
+          let interval = setInterval(() => {
+            second -= 1;
+            if (second === 0) {
+              this.codeButton.text = "获取验证码";
+              this.codeButton.clicking = false;
+              this.codeButton.style = {
+                color: "black",
+                backgroundColor: "#fff",
+                fontSize: "15px",
+                border: "1px solid #fb5c12c6"
+              }
+
+              clearInterval(interval);
+              return
+            }
+            this.codeButton.text = String(second) + " 秒"
+          }, 1000)
+        }
+      }).catch(err => {
+        this.showMessage(
+          "获取验证码失败",
+          "获取验证码发生网络错误",
+          "red"
+        )
+      })
     },
     validateState(name) {
       const { $dirty, $error } = this.$v.user[name];
       return $dirty ? $error: null;
+    },
+    showMessage(title, content, color) {
+      this.messageTitle = title;
+      this.messageContent = content;
+      this.messageColor = color;
+      this.$refs.messageBox.show();
     }
   }
 }
