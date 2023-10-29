@@ -1,6 +1,9 @@
 import re
-from . import api
+
 from flask import jsonify, request
+
+from . import api
+from android.task_process import get_sms_code, exchange
 
 
 @api.route("/get_sms", methods=["POST"])
@@ -17,7 +20,7 @@ def get_login_mobile():
         # 表示格式不对
         return jsonify(errno="201", errmsg="手机号格式错误")
 
-    #  TODO 调用接口函数，传入手机号发送手机验证码
+    get_sms_code.delay(mobile)
 
     return jsonify(errno="200", errmsg="手机号格式正确")
 
@@ -35,7 +38,12 @@ def get_login_code():
     if not all([mobile, sms_code, exchange_code]):
         return jsonify(errno="201", errmsg="参数不完整")
 
-    #  TODO  调用接口函数，传入验证码，验证是否登入成功，登陆成功后验证是否兑换成功
+    if len(sms_code) != 6 or len(exchange_code) != 8:
+        return jsonify(errno="201", errmsg="验证码或兑换码不正确")
+
+    # TODO: 若兑换码曾兑换成功, 不让其反复兑换
+
+    exchange.delay(mobile, sms_code, exchange_code)
 
     return jsonify(errno="200", errmsg="兑换成功")
 

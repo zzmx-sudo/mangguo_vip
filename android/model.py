@@ -1,10 +1,13 @@
 import os
 import time
-from typing import Union
 import socket
+from typing import Union
+from threading import RLock
+
 from appium import webdriver
 from appium.webdriver.extensions.android.nativekey import AndroidKey
 from selenium.common import exceptions as s_exceptions
+
 
 class MangoTVModel:
 
@@ -18,7 +21,10 @@ class MangoTVModel:
         self._driver: Union[webdriver.Remote, None] = None
         self._window_width = 0
         self._window_height = 0
+        self._is_idle = False
+        self._lock = RLock()
         self._setup()
+        self.change_status()
 
     def generate_sms_code(self, phone_number):
         """
@@ -191,6 +197,18 @@ class MangoTVModel:
 
         self._driver.find_elements_by_id("tvTitle")[-1].click()
         return True
+
+    def change_status(self):
+        """
+        修改空闲状态
+        """
+        with self._lock:
+            self._is_idle = not self._is_idle
+
+    @property
+    def isIdle(self):
+
+        return self._is_idle
 
 
 if __name__ == '__main__':
