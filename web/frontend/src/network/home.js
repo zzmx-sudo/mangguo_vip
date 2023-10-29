@@ -10,14 +10,14 @@ export function getCode(telephone) {
   })
 }
 
-export function exchange({ telephone, sms_code, exchange_code }) {
+export function exchange({ telephone, code, exchangeCode }) {
   return request({
     url: "/exchange",
     method: "post",
     data: {
       telephone,
-      sms_code,
-      exchange_code
+      sms_code: code,
+      exchange_code: exchangeCode
     }
   })
 }

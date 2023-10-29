@@ -94,7 +94,6 @@ export default {
       if (this.exchangeButton.text !== "点击兑换" || this.exchangeButton.clicking) {
         return
       }
-      console.log("exchangeClick...");
       if (!this.user.telephone || !this.user.code || ! this.user.exchangeCode) {
         this.showMessage(
           "参数不完整",
