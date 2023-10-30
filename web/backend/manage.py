@@ -6,14 +6,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 
-from web.backend import create_app
+from web.backend import create_app, db
 
 # manager监管app
 app = create_app()
 manager = Manager(app)
 
 # 配置db命令
-Migrate(manager, app)
+Migrate(manager, db)
 manager.add_command("db", MigrateCommand)
 
 
