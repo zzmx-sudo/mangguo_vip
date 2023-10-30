@@ -7,7 +7,7 @@ from android.task_process import get_sms_code, exchange
 
 
 @api.route("/get_sms", methods=["POST"])
-def get_login_mobile():
+def get_sms():
     # 获取手机号
     req_dict = request.get_json()
     if not req_dict or not req_dict.get("telephone"):
@@ -26,7 +26,7 @@ def get_login_mobile():
 
 
 @api.route("/exchange", methods=["POST"])
-def get_login_code():
+def exchange():
     # 获取手机验证码，兑换码
     req_dict = request.get_json()
     if not req_dict:
@@ -46,6 +46,3 @@ def get_login_code():
     exchange.delay(mobile, sms_code, exchange_code)
 
     return jsonify(errno="200", errmsg="兑换成功")
-
-
-

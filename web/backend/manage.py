@@ -1,16 +1,21 @@
-from utils.commons import ReConverter
-from flask import Flask
+import os
+import sys
 
-app = Flask(__name__)
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-app.url_map.converters["re"] = ReConverter
+from flask_script import Manager
+from flask_migrate import Migrate, MigrateCommand
 
-from api_1_0 import api
-app.register_blueprint(api, url_prefix="/api")
+from web.backend import create_app
 
-from web_html import html
-app.register_blueprint(html, url_prefix="")
+# manager监管app
+app = create_app()
+manager = Manager(app)
+
+# 配置db命令
+Migrate(manager, app)
+manager.add_command("db", MigrateCommand)
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    manager.run()
