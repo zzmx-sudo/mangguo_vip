@@ -4,6 +4,7 @@ __all__ = [
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 from utils.commons import ReConverter
 from . config import Config
@@ -17,6 +18,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     db.init_app(app)
+
+    Migrate(app, db)
 
     # 配置转换器和路由
     app.url_map.converters["re"] = ReConverter
