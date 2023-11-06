@@ -41,10 +41,6 @@ class MainWindow(QMainWindow):
         if self._celery_process is None:
             # 开启celery进程
             self._start_celery()
-            self.ui.powerPushbutton.setStyleSheet(f"""
-                {self._close_button_style()}
-            """)
-            self.ui.powerPushbutton.setText("关闭充值服务")
         else:
             # 关闭celery进程
             self._close_celery()
@@ -59,13 +55,17 @@ class MainWindow(QMainWindow):
         self._watch_thread.signal.connect(self._watch_celery_status)
         self._watch_thread.start()
         self.ui.handleLogEdit.append(self._add_datetime_to_msg("充值服务已开启"))
+        self.ui.powerPushbutton.setStyleSheet(f"""
+            {self._close_button_style()}
+        """)
+        self.ui.powerPushbutton.setText("关闭充值服务")
 
     def _close_celery(self):
         self._kill_process(self._celery_process.pid)
-        self.ui.handleLogEdit.append(self._add_datetime_to_msg("充值服务已关闭"))
         self._watch_thread.run_flag = False
         self._watch_thread.quit()
         self._celery_process = None
+        self.ui.handleLogEdit.append(self._add_datetime_to_msg("充值服务已关闭"))
         self.ui.powerPushbutton.setStyleSheet(f"""
             {self._open_button_style()}
         """)
