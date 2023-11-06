@@ -50,7 +50,7 @@
          </size>
         </property>
         <property name="text">
-         <string>充值日志：</string>
+         <string>充值服务日志：</string>
         </property>
        </widget>
       </item>

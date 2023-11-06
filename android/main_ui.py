@@ -49,5 +49,5 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.label.setText(_translate("MainWindow", "充值日志："))
+        self.label.setText(_translate("MainWindow", "充值服务日志："))
         self.powerPushbutton.setText(_translate("MainWindow", "开启充值服务"))
