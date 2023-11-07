@@ -5,11 +5,16 @@ __pycache__
 # IDE env
 .vscode
 
+# mac env
+.DS_Store
+
 # frontend
 node_modules/
 
-# mac env
-.DS_Store
+# backend
+migrations/
+
+# android
 
 # demo file
 demo*

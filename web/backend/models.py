@@ -14,8 +14,8 @@ class ExchangeModel(BaseModel, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     telephone = db.Column(db.String(11), unique=True, nullable=False)
-    sms_code = db.Column(db.String(6))
-    exchange_code = db.Column(db.String(8), unique=True, nullable=False)
+    sms_code = db.Column(db.String(10), nullable=True)
+    exchange_code = db.Column(db.String(64), unique=True, nullable=False, index=True)
     status = db.Column(
         db.Enum(
             "DOING",    # 兑换中
@@ -23,3 +23,4 @@ class ExchangeModel(BaseModel, db.Model):
             "SUCC"      # 兑换成功
         ),
     default="DOING", index=True)
+    failed_msg = db.Column(db.String(256), nullable=True)

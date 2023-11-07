@@ -8,7 +8,8 @@ from PyQt5.Qt import QApplication, QMainWindow
 from PyQt5.QtCore import QThread, pyqtSignal
 
 from main_ui import Ui_MainWindow
-import settings
+from android import settings
+
 
 class MainWindow(QMainWindow):
 
@@ -61,7 +62,7 @@ class MainWindow(QMainWindow):
         self.ui.powerPushbutton.setText("关闭充值服务")
 
     def _close_celery(self):
-        self._kill_process(self._celery_process.pid)
+        self._kill_celery_process()
         self._watch_thread.run_flag = False
         self._watch_thread.quit()
         self._celery_process = None
@@ -79,7 +80,7 @@ class MainWindow(QMainWindow):
             if msg == 0:
                 self.ui.handleLogEdit.append(self._add_datetime_to_msg("充值服务正常退出"))
             else:
-                self.ui.handleLogEdit.append(self._add_datetime_to_msg("充值服务异常退出"))
+                self.ui.handleLogEdit.append(self._add_datetime_to_msg("充值服务异常退出, 退出码: %d" % msg))
                 self._close_celery()
 
     @staticmethod
@@ -110,9 +111,9 @@ class MainWindow(QMainWindow):
             }
         """
 
-    def _kill_process(self, pid):
+    def _kill_celery_process(self):
         try:
-            process = psutil.Process(pid)
+            process = psutil.Process(self._celery_process.pid)
         except:
             return
 
@@ -138,8 +139,12 @@ class WatchCeleryThread(QThread):
     def run(self):
         while self.run_flag:
             if self._process.poll() is not None:
+                stdout = self._process.stdout.read().strip().decode("utf-8", errors="ignore")
+                self.signal.emit(("doing", stdout))
+                stderr = self._process.stderr.read().strip().decode("utf-8", errors="ignore")
+                self.signal.emit(("doing", stderr))
                 self.signal.emit(("exit", self._process.poll()))
-                continue
+                break
 
             line = self._process.stdout.readline().strip().decode("utf-8", errors="ignore")
             while line:

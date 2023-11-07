@@ -2,12 +2,13 @@ import time
 
 from celery import Celery
 
-import settings
+from . import settings
 from . model import MangoTVModel
+from . db_models import ExchangeModel
 
 
 mobile = None
-app = Celery("task_process", broker=settings.REDIS_LINK_PATH)
+app = Celery("android.task_process", broker=settings.REDIS_LINK_PATH)
 
 @app.task
 def get_sms_code(telephone):
@@ -33,5 +34,6 @@ def exchange(telephone, sms_code, exchange_code):
 
     mobile.change_status()
     result = mobile.login_and_fillIn_redeemCode(telephone, sms_code, exchange_code)
-    # TODO: 修改数据库状态
+    ExchangeModel.updateStatus(telephone, sms_code, exchange_code, result)
+
     mobile.change_status()

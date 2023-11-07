@@ -12,3 +12,6 @@ ANDROID_VERSION = "12"
 
 # redis地址和数据库
 REDIS_LINK_PATH = "redis://127.0.0.1:6379/8"
+
+# mysql地址
+MYSQL_URL = "mysql://root:123456@127.0.0.1:3306/mangguo_vip?charset=utf8"

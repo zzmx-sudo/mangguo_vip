@@ -97,6 +97,7 @@ class MangoTVModel:
             close_button.click()
             return "登录失败, 验证码不正确或失效"
         # TODO: 兑换操作
+        return "SUCC"
 
     def quit(self):
         """

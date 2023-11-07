@@ -3,7 +3,9 @@ import re
 from flask import jsonify, request
 
 from . import api
+from web.backend import db
 from android.task_process import get_sms_code, exchange
+from web.backend.models import ExchangeModel
 
 
 @api.route("/get_sms", methods=["POST"])
@@ -41,8 +43,33 @@ def exchange():
     if len(sms_code) != 6 or len(exchange_code) != 8:
         return jsonify(errno="201", errmsg="验证码或兑换码不正确")
 
-    # TODO: 若兑换码曾兑换成功, 不让其反复兑换
+    try:
+        exchanged = ExchangeModel.query.filter_by(exchange_code=exchange_code).first()
+    except Exception as e:
+        exchange.delay(mobile, sms_code, exchange_code)
+        return jsonify(errno="200", errmsg="兑换成功")
+
+    if exchanged is not None:
+        if exchanged.status != "FAIL":
+            return jsonify(errno="201", errmsg="该兑换码已兑换, 请勿重复兑换！")
+        else:
+            try:
+                exchanged.update({"status": "DOING"})
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+    else:
+        exchanged = ExchangeModel(
+            telephone=mobile,
+            sms_code=sms_code,
+            exchange_code=exchange_code,
+            status="DOING"
+        )
+        try:
+            db.session.add(exchanged)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
 
     exchange.delay(mobile, sms_code, exchange_code)
-
     return jsonify(errno="200", errmsg="兑换成功")
