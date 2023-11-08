@@ -1,5 +1,6 @@
 import sys
 import os
+import platform
 
 # 项目主路径
 if getattr(sys, "frozen", False):
@@ -15,3 +16,6 @@ REDIS_LINK_PATH = "redis://127.0.0.1:6379/8"
 
 # mysql地址
 MYSQL_URL = "mysql://root:123456@127.0.0.1:3306/mangguo_vip?charset=utf8"
+
+# 系统名称
+SYSTEM = platform.system()

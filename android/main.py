@@ -50,7 +50,7 @@ class MainWindow(QMainWindow):
         cwd = settings.BASE_DIR
         cmd = "celery -A android.task_process worker -l info -c 1"
         self._celery_process = subprocess.Popen(
-            cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+            cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True
         )
         self._watch_thread = WatchCeleryThread(self._celery_process)
         self._watch_thread.signal.connect(self._watch_celery_status)
@@ -141,8 +141,6 @@ class WatchCeleryThread(QThread):
             if self._process.poll() is not None:
                 stdout = self._process.stdout.read().strip().decode("utf-8", errors="ignore")
                 self.signal.emit(("doing", stdout))
-                stderr = self._process.stderr.read().strip().decode("utf-8", errors="ignore")
-                self.signal.emit(("doing", stderr))
                 self.signal.emit(("exit", self._process.poll()))
                 break
 
