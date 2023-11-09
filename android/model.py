@@ -7,6 +7,7 @@ from threading import RLock
 from appium import webdriver
 from appium.webdriver.extensions.android.nativekey import AndroidKey
 from selenium.common import exceptions as s_exceptions
+from appium.webdriver.common.touch_action import TouchAction
 
 
 class MangoTVModel:
@@ -39,8 +40,8 @@ class MangoTVModel:
                     element.click()
                     break
 
-        phone_clear = self._driver.find_element_by_id("ivClear")
-        if phone_clear: phone_clear.click()
+        phone_clear = self._driver.find_elements_by_id("ivClear")
+        if phone_clear: phone_clear[-1].click()
 
         elements = self._driver.find_elements_by_id("etContent")
         if elements:
@@ -157,6 +158,7 @@ class MangoTVModel:
         self._driver.implicitly_wait(10)
 
         # 进入APP后确认是退出登录状态
+        time.sleep(5)
         self._check_back_profile()
 
     def _check_back_profile(self):
@@ -169,7 +171,7 @@ class MangoTVModel:
             return False
 
         # 进入我的页面
-        bottom_menus[-1].click()
+        self.click_element(bottom_menus[-1])
 
         # 获取用户名, 若用户名不为立即登录则表示已经登录, 需退出登录
         username = self._driver.find_element_by_id("tvNickname")
@@ -198,6 +200,10 @@ class MangoTVModel:
 
         self._driver.find_elements_by_id("tvTitle")[-1].click()
         return True
+
+    def click_element(self, element):
+        # TouchAction(self._driver).tap(element).perform()
+        TouchAction(self._driver).press(el=element).release().perform()
 
     def change_status(self):
         """

@@ -7,9 +7,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from . import settings
 
-if settings.SYSTEM == "Darwin":
-    import pymysql
-    pymysql.install_as_MySQLdb()
+import pymysql
+pymysql.install_as_MySQLdb()
 
 engine = create_engine(
     settings.MYSQL_URL,

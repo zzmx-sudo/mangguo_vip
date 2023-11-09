@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
 
     def _start_celery(self):
         cwd = settings.BASE_DIR
-        cmd = "celery -A android.task_process worker -l info -c 1"
+        cmd = "celery -A android.task_process worker -l info -c 1 --pool=solo"
         self._celery_process = subprocess.Popen(
             cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True
         )

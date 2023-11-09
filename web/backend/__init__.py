@@ -11,9 +11,8 @@ from utils.public_func import get_system
 from . config import Config
 
 # 数据库
-if get_system() == "Darwin":
-    import pymysql
-    pymysql.install_as_MySQLdb()
+import pymysql
+pymysql.install_as_MySQLdb()
 db = SQLAlchemy()
 from web.backend import models
 
